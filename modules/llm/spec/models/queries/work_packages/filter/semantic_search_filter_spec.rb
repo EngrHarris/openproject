@@ -74,6 +74,23 @@ RSpec.describe Queries::WorkPackages::Filter::SemanticSearchFilter do
     end
   end
 
+  describe "#valid?" do
+    before do
+      allow(Llm::WorkPackages::SemanticSearch).to receive(:available?).and_return(true)
+    end
+
+    it "is valid when the query embeds" do
+      expect(instance).to be_valid
+    end
+
+    it "is invalid when the query cannot be embedded" do
+      allow(Llm::WorkPackages::SemanticSearch).to receive(:query_vector).and_return(nil)
+
+      expect(instance).not_to be_valid
+      expect(instance.errors[:values]).to include(I18n.t("activerecord.errors.messages.semantic_search_unavailable"))
+    end
+  end
+
   describe "in a query" do
     let(:admin) { create(:admin) }
     let(:query) do

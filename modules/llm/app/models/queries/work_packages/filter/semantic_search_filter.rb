@@ -40,9 +40,26 @@ class Queries::WorkPackages::Filter::SemanticSearchFilter <
   end
 
   def where
-    vector = Llm::WorkPackages::SemanticSearch.query_vector(values.first)
     return "1=0" if vector.nil?
 
     "#{WorkPackage.table_name}.id IN (#{WorkPackageEmbedding.work_package_ids_within_search_distance_sql(vector)})"
+  end
+
+  protected
+
+  def validate_values
+    super
+
+    return unless errors.empty?
+    return if values.first.blank?
+    return unless Llm::WorkPackages::SemanticSearch.available?
+
+    errors.add(:values, :semantic_search_unavailable) if vector.nil?
+  end
+
+  private
+
+  def vector
+    Llm::WorkPackages::SemanticSearch.query_vector(values.first)
   end
 end
