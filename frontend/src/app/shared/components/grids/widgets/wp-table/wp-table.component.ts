@@ -32,6 +32,7 @@ import { QueryResource } from 'core-app/features/hal/resources/query-resource';
 import {
   WorkPackageTableConfiguration,
 } from 'core-app/features/work-packages/components/wp-table/wp-table-configuration';
+import { generateId } from 'core-app/shared/helpers/dom-helpers';
 import { Observable, switchMap } from 'rxjs';
 import { I18nService } from 'core-app/core/i18n/i18n.service';
 import { IsolatedQuerySpace } from 'core-app/features/work-packages/directives/query-space/isolated-query-space';
@@ -60,7 +61,10 @@ export class WidgetWpTableComponent extends AbstractWidgetComponent implements O
 
   public query$:Observable<QueryResource>;
 
+  public readonly headingId = generateId('wp-widget-heading');
+
   public configuration:Partial<WorkPackageTableConfiguration> = {
+    labelledBy: this.headingId,
     actionsColumnEnabled: false,
     columnMenuEnabled: false,
     hierarchyToggleEnabled: true,
