@@ -277,7 +277,8 @@ describe('SingleRowBuilder refresh with an active editor', () => {
     harness.table.refreshRows(harness.injector.get(States).workPackages.get('1').value!);
 
     expect(within(harness.row('1')).getByRole('textbox').closest('td')).toBe(subjectCell);
-    expect(subjectCell).toHaveAttribute('role', 'gridcell');
+    expect(subjectCell).toHaveAttribute('role', 'rowheader');
+    expect(subjectCell).toHaveAccessibleName('Work package 1');
     expect(harness.row('1')).toHaveAttribute('aria-level', '1');
     expect(harness.row('1')).toHaveAttribute('aria-selected', 'true');
   });
@@ -300,6 +301,12 @@ describe('SingleRowBuilder refresh with an active editor', () => {
     harness.expand('1', 'relationsOfTypeFollows');
     harness.expand('3', 'children');
     await harness.render();
+
+    [harness.row('2'), harness.relationRow('1', '2'), harness.relationRow('3', '2', 'children')]
+      .forEach((row) => {
+        expect(within(row).getAllByRole('rowheader')).toHaveLength(1);
+        expect(within(row).getByRole('rowheader', { name: 'Original' })).toHaveClass('subject');
+      });
 
     const origin = harness.row('2').querySelector<HTMLTableCellElement>('td.subject')!;
     const siblingCells = [
@@ -324,6 +331,7 @@ describe('SingleRowBuilder refresh with an active editor', () => {
         .forEach((row, index) => {
           const cell = row.querySelector('td.subject')!;
           expect(cell).not.toBe(siblingCells[index]);
+          expect(within(row).getByRole('rowheader', { name: 'Renamed' })).toBe(cell);
           expect(cell.querySelector('.inline-edit--display-field')).toHaveTextContent('Renamed');
           expect(within(row).queryByRole('textbox')).toBeNull();
         });
@@ -333,10 +341,17 @@ describe('SingleRowBuilder refresh with an active editor', () => {
     expect(input).toHaveFocus();
     expect(input).toHaveValue('Draft in the origin');
     expect(form.activeFields.subject).toBe(handler);
+    expect(origin).toHaveAccessibleName('Original');
 
     handler.deactivate(true, true);
     await waitFor(() => expect(within(origin).queryByRole('textbox')).toBeNull());
     expect(origin).toHaveFocus();
     expect(origin.querySelector('.inline-edit--display-field')).toHaveTextContent('Renamed');
+    [harness.row('2'), harness.relationRow('1', '2'), harness.relationRow('3', '2', 'children')]
+      .forEach((row) => {
+        expect(within(row).getAllByRole('rowheader')).toHaveLength(1);
+        expect(within(row).getByRole('rowheader', { name: 'Renamed' })).toHaveClass('subject');
+        expect(within(row).queryByRole('rowheader', { name: 'Original', hidden: true })).toBeNull();
+      });
   });
 });

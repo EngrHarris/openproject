@@ -25,7 +25,6 @@
 // See COPYRIGHT and LICENSE files for more details.
 //++
 
-import { within } from '@testing-library/dom';
 import { buildTable, TableHarness } from './testing/table-harness';
 import { buildWorkPackage } from './testing/work-package-fixture';
 import { Highlighting } from './builders/highlighting/highlighting.functions';
@@ -49,7 +48,8 @@ describe('WorkPackageTable', () => {
 
     await harness.render();
 
-    const cells = within(harness.row('1')).getAllByRole('gridcell');
+    const cells = Array.from(harness.row('1').cells);
+    expect(cells.map((cell) => cell.getAttribute('role'))).toEqual(['gridcell', 'rowheader', 'gridcell']);
     expect(cells).toHaveLength(3);
     expect(cells[0]).not.toHaveClass('subject');
     expect(cells[1]).toHaveClass('subject');
