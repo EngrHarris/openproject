@@ -35,20 +35,24 @@ import { wpOccurrenceKey } from '../../rendered-occurrence-ledger';
 describe('WorkPackageStateLinksHandler', () => {
   const harnesses:TableHarness[] = [];
 
-  const mount = async (keyboardNavigationEnabled:boolean) => {
-    const table = buildTable({
-      workPackages: [{ id: '1' }],
-      productionMarkup: true,
-      configuration: { keyboardNavigationEnabled },
-    });
-    harnesses.push(table);
-    await table.render();
-    const cell = keyboardNavigationEnabled ? navigableCells(table.row('1'))[0] : table.row('1').cells[0];
+  const stateLink = () => {
     const link = document.createElement('a');
     link.href = '#';
     link.classList.add(uiStateLinkClass);
     link.dataset.wpState = 'show';
     link.dataset.workPackageId = '1';
+    return link;
+  };
+
+  const mount = async () => {
+    const table = buildTable({
+      workPackages: [{ id: '1' }],
+      productionMarkup: true,
+    });
+    harnesses.push(table);
+    await table.render();
+    const cell = navigableCells(table.row('1'))[0];
+    const link = stateLink();
     cell.append(link);
     return { table, cell, link };
   };
@@ -58,7 +62,7 @@ describe('WorkPackageStateLinksHandler', () => {
   });
 
   it('returns a walked state link to its row origin', async () => {
-    const { table, link } = await mount(true);
+    const { table, link } = await mount();
     const clicked = vi.fn();
     table.outputs.stateLinkClicked.subscribe(clicked);
     table.table.keyboardNavigation!.focusPosition({ key: wpOccurrenceKey('1'), cell: null, desiredColumn: null });
@@ -73,7 +77,7 @@ describe('WorkPackageStateLinksHandler', () => {
   });
 
   it('returns a pointer-activated state link to its enclosing cell', async () => {
-    const { cell, link } = await mount(true);
+    const { cell, link } = await mount();
     fireEvent.mouseDown(link, { button: 0 });
 
     fireEvent.click(link);
@@ -82,11 +86,18 @@ describe('WorkPackageStateLinksHandler', () => {
     expect(document.body).not.toHaveFocus();
   });
 
-  it('keeps the legacy blur when keyboard navigation is disabled', async () => {
-    const { link } = await mount(false);
+  it('blurs a state link outside any table position', async () => {
+    const table = buildTable({ workPackages: [{ id: '1' }], timelineVisible: true });
+    harnesses.push(table);
+    await table.render();
+    const link = stateLink();
+    table.timelineRow('1').append(link);
+    link.focus();
+    expect(link).toHaveFocus();
 
     fireEvent.click(link);
 
+    expect(link).not.toHaveFocus();
     expect(document.body).toHaveFocus();
   });
 });

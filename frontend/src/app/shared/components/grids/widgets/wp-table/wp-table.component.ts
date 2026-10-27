@@ -69,7 +69,6 @@ export class WidgetWpTableComponent extends AbstractWidgetComponent implements O
     columnMenuEnabled: false,
     hierarchyToggleEnabled: true,
     contextMenuEnabled: false,
-    keyboardNavigationEnabled: true,
   };
 
   protected cdRef = inject(ChangeDetectorRef);
