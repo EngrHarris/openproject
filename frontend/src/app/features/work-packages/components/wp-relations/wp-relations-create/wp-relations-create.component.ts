@@ -68,9 +68,10 @@ export class WorkPackageRelationsCreateComponent {
     addNewRelation: this.I18n.t('js.relation_buttons.add_new_relation'),
   };
 
-  public onSelected(workPackage?:WorkPackageResource) {
+  public onSelected(workPackage:unknown) {
+    if (!workPackage || typeof workPackage !== 'object' || !('id' in workPackage) || (typeof workPackage.id !== 'string' && typeof workPackage.id !== 'number')) { return; }
     if (workPackage) {
-      this.selectedWpId = workPackage.id!;
+      this.selectedWpId = String(workPackage.id);
       this.createCommonRelation();
     }
   }

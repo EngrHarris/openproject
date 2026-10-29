@@ -110,7 +110,7 @@ export class BoardInlineAddAutocompleterComponent implements AfterViewInit {
   };
 
   public autocompleterOptions = {
-    resource: 'work_packages',
+    resource: 'work_packages' as const,
     getOptionsFn: this.getAutocompleterData,
   };
 
@@ -138,7 +138,8 @@ export class BoardInlineAddAutocompleterComponent implements AfterViewInit {
     this.onCancel.emit();
   }
 
-  public addWorkPackageToQuery(workPackage?:WorkPackageResource) {
+  public addWorkPackageToQuery(workPackage:unknown) {
+    if (!this.isWorkPackage(workPackage)) { return; }
     if (workPackage) {
       this.schemaCacheService
         .ensureLoaded(workPackage)
@@ -149,4 +150,9 @@ export class BoardInlineAddAutocompleterComponent implements AfterViewInit {
         .catch((error:unknown) => this.notificationService.handleRawError(error));
     }
   }
+
+  private isWorkPackage(value:unknown):value is WorkPackageResource {
+    return value instanceof WorkPackageResource;
+  }
+
 }

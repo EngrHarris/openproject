@@ -35,12 +35,26 @@ import idFromLink from 'core-app/features/hal/helpers/id-from-link';
 import { QueryFilterInstanceSchemaResource } from 'core-app/features/hal/resources/query-filter-instance-schema-resource';
 import { QueryFilterResource } from 'core-app/features/hal/resources/query-filter-resource';
 
+export type QueryFilterValue = HalResource|string|number|Record<string, unknown>|{ id:string|number|null; href:string|null };
+
+export function isQueryFilterValue(value:unknown):value is QueryFilterValue {
+  return typeof value === 'string' || typeof value === 'number' || (typeof value === 'object' && value !== null);
+}
+
+export function queryFilterValueId(value:unknown):string|number {
+  const id = typeof value === 'object' && value !== null && 'id' in value ? value.id : value;
+  if (typeof id !== 'string' && typeof id !== 'number') {
+    throw new TypeError('Expected a filter value with an ID');
+  }
+  return id;
+}
+
 export class QueryFilterInstanceResource extends HalResource {
   public filter:QueryFilterResource;
 
   public operator:QueryOperatorResource;
 
-  public values:HalResource[]|string[];
+  public values:QueryFilterValue[];
 
   private memoizedCurrentSchemas:Record<string, QueryFilterInstanceSchemaResource> = {};
 

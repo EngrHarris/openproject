@@ -25,6 +25,7 @@
 // See COPYRIGHT and LICENSE files for more details.
 //++
 
+import { queryFilterValueId } from 'core-app/features/hal/resources/query-filter-instance-resource';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { I18nService } from 'core-app/core/i18n/i18n.service';
 import {
@@ -39,7 +40,6 @@ import {
 import {
   WpRelationInlineCreateServiceInterface,
 } from 'core-app/features/work-packages/components/wp-relations/embedded/wp-relation-inline-create.service.interface';
-import { WorkPackageResource } from 'core-app/features/hal/resources/work-package-resource';
 import { UrlParamsHelperService } from 'core-app/features/work-packages/components/wp-query/url-params-helper';
 import { RelationResource } from 'core-app/features/hal/resources/relation-resource';
 import { HalEventsService } from 'core-app/features/hal/services/hal-events.service';
@@ -113,9 +113,10 @@ export class WpRelationInlineAddExistingComponent {
       });
   }
 
-  public onSelected(workPackage?:WorkPackageResource) {
+  public onSelected(workPackage:unknown) {
+    if (!workPackage || typeof workPackage !== 'object' || !('id' in workPackage) || (typeof workPackage.id !== 'string' && typeof workPackage.id !== 'number')) { return; }
     if (workPackage) {
-      this.selectedWpId = workPackage.id!;
+      this.selectedWpId = String(workPackage.id);
       this.addExisting();
     }
   }
@@ -151,7 +152,7 @@ export class WpRelationInlineAddExistingComponent {
       iApiFilters.push({
         name: filter.id,
         operator: filter.operator.id as FilterOperator,
-        values: filter.values.map((f) => (typeof f === 'string' ? f : f.id!)),
+        values: filter.values.map(queryFilterValueId),
       });
     });
 

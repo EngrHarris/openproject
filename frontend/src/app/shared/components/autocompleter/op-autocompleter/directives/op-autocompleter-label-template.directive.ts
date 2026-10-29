@@ -25,16 +25,22 @@
 // See COPYRIGHT and LICENSE files for more details.
 //++
 
-import { Directive } from '@angular/core';
+import { Directive, Input } from '@angular/core';
+import { OpAutocompleterComponent } from '../op-autocompleter.component';
+import { AutocompleterLabelContext } from '../typings';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[op-autocompleter-label-tmp]',
   standalone: false,
 })
-// A Directive to be used on the label template of
-//  ng-select (what will be shown in the input box after selecting an item)
-// it is used when you want to inject a different template
-export class OpAutocompleterLabelTemplateDirective {
+export class OpAutocompleterLabelTemplateDirective<T = unknown> {
+  @Input('op-autocompleter-label-tmp') autocompleter:Pick<OpAutocompleterComponent<T>, 'items'|'getOptionsFn'>|'';
 
+  static ngTemplateContextGuard<T>(
+    _directive:OpAutocompleterLabelTemplateDirective<T>,
+    _context:unknown,
+  ):_context is AutocompleterLabelContext {
+    return true;
+  }
 }

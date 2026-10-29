@@ -8,7 +8,7 @@
       [attr.data-action]="hiddenFieldAction">
   }
   @if (multiple && multipleAsSeparateInputs) {
-    @for (value of mappedInputValue; track value) {
+    @for (value of mappedInputValue; track $index) {
       <input
         type="hidden"
         [attr.name]="inputName+'[]'"
@@ -19,8 +19,8 @@
   <ng-select
     #ngSelectInstance
     [(ngModel)]="model"
-    [items]="results$ | async"
-    [ngClass]="classes"
+    [items]="(results$ | async) ?? []"
+    [ngClass]="classes ?? ''"
     [typeahead]="typeahead"
     [clearOnBackspace]="clearOnBackspace"
     [clearSearchOnAdd]="clearSearchOnAdd"
@@ -34,8 +34,8 @@
     [clearable]="clearable"
     [closeOnSelect]="closeOnSelect"
     [openOnEnter]="openOnEnter"
-    [disabled]="disabled"
-    [name]="name"
+    [disabled]="disabled ?? false"
+    [name]="name ?? ''"
     [id]="id"
     [attr.accesskey]="accesskey||undefined"
     [bindLabel]="bindLabel"
@@ -192,7 +192,7 @@
     }
     @case (resource ==='subproject' || resource ==='version' || resource ==='status' || resource ==='default' || (!resource && !item.depth)) {
       <span
-        [ngClass]="'ng-option-label ' + (item?.[additionalClassProperty] || '')"
+        [ngClass]="'ng-option-label ' + (additionalClassProperty ? item?.[additionalClassProperty] || '' : '')"
         [attr.data-hover-card-trigger-target]="getHoverCardTriggerTarget(item)"
         [attr.data-hover-card-url]="getHoverCardUrl(item)"
         [ngOptionHighlight]="search">{{ item.name }}

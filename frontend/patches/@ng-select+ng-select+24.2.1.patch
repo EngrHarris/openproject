@@ -21,3 +21,62 @@ index b2b2d6d..86facac 100644
  	}
  	_scrollToMarked() {
  		if (!this.isOpen() || !this.dropdownPanel()) return;
+diff --git a/node_modules/@ng-select/ng-select/types/ng-select-ng-select.d.ts b/node_modules/@ng-select/ng-select/types/ng-select-ng-select.d.ts
+index 9a3de22..1719593 100644
+--- a/node_modules/@ng-select/ng-select/types/ng-select-ng-select.d.ts
++++ b/node_modules/@ng-select/ng-select/types/ng-select-ng-select.d.ts
+@@ -1240,7 +1240,7 @@ export declare class NgSelectComponent implements OnChanges, OnInit, AfterViewIn
+   readonly _loadingText: import("@angular/core").InputSignal<string>;
+   readonly loadingText: import("@angular/core").WritableSignal<string>;
+   /** Set custom text for clear all icon title */
+-  readonly _clearAllText: import("@angular/core").InputSignal<string>;
++  readonly _clearAllText: import("@angular/core").InputSignal<string | undefined>;
+   readonly clearAllText: import("@angular/core").WritableSignal<string>;
+   /** Set custom text prefixed to the option label in the aria-label of the remove icon on selected values (multiple mode) */
+   readonly _removeText: import("@angular/core").InputSignal<string>;
+@@ -1282,10 +1282,10 @@ export declare class NgSelectComponent implements OnChanges, OnInit, AfterViewIn
+   readonly _maxSelectedItems: import("@angular/core").InputSignalWithTransform<number, unknown>;
+   readonly maxSelectedItems: import("@angular/core").WritableSignal<number>;
+   /** Allow to group items by key or function expression */
+-  readonly _groupBy: import("@angular/core").InputSignal<string | ((value: any) => any)>;
++  readonly _groupBy: import("@angular/core").InputSignal<string | ((value: any) => any) | undefined>;
+   readonly groupBy: import("@angular/core").WritableSignal<string | ((value: any) => any)>;
+   /** Function expression to provide group value */
+-  readonly _groupValue: import("@angular/core").InputSignal<GroupValueFn>;
++  readonly _groupValue: import("@angular/core").InputSignal<GroupValueFn | undefined>;
+   readonly groupValue: import("@angular/core").WritableSignal<GroupValueFn>;
+   /** Used in virtual scrolling, the `bufferAmount` property controls the number of items preloaded in the background to ensure smoother and more seamless scrolling. */
+   readonly _bufferAmount: import("@angular/core").InputSignalWithTransform<number, unknown>;
+@@ -1339,7 +1339,7 @@ export declare class NgSelectComponent implements OnChanges, OnInit, AfterViewIn
+   readonly _panelClass: import("@angular/core").InputSignal<ClassValue>;
+   readonly panelClass: import("@angular/core").WritableSignal<ClassValue>;
+   /** Custom autocomplete or advanced filter. */
+-  readonly _typeahead: import("@angular/core").InputSignal<Subject<string>>;
++  readonly _typeahead: import("@angular/core").InputSignal<Subject<string> | null | undefined>;
+   readonly typeahead: import("@angular/core").WritableSignal<Subject<string>>;
+   /** Allows to select multiple items. */
+   readonly _multiple: import("@angular/core").InputSignalWithTransform<boolean, unknown>;
+@@ -1362,7 +1362,7 @@ export declare class NgSelectComponent implements OnChanges, OnInit, AfterViewIn
+   readonly _clearSearchOnAdd: import("@angular/core").InputSignal<any>;
+   readonly clearSearchOnAdd: import("@angular/core").WritableSignal<any>;
+   /** A function to compare the option values with the selected values. The first argument is a value from an option. The second is a value from the selection(model). A boolean should be returned. */
+-  readonly _compareWith: import("@angular/core").InputSignalWithTransform<CompareWithFn, CompareWithFn>;
++  readonly _compareWith: import("@angular/core").InputSignalWithTransform<CompareWithFn | null | undefined, CompareWithFn | null | undefined>;
+   readonly compareWith: import("@angular/core").WritableSignal<CompareWithFn>;
+   /** Provide custom keyDown function. Executed before default handler. Return false to suppress execution of default key down handlers */
+   readonly _keyDownFn: import("@angular/core").InputSignal<(_: KeyboardEvent) => boolean>;
+@@ -1372,11 +1372,11 @@ export declare class NgSelectComponent implements OnChanges, OnInit, AfterViewIn
+   /** @deprecated Has no effect: the CDK overlay renders in the native Popover API top layer automatically in supporting browsers. Will be removed in a future major version. */
+   readonly popover: import("@angular/core").WritableSignal<boolean>;
+   /** Object property to use for label. Default `label` */
+-  readonly bindLabel: import("@angular/core").ModelSignal<string>;
++  readonly bindLabel: import("@angular/core").ModelSignal<string | undefined>;
+   /** Object property to use for selected model. By default binds to whole object. */
+-  readonly bindValue: import("@angular/core").ModelSignal<string>;
++  readonly bindValue: import("@angular/core").ModelSignal<string | undefined>;
+   /** Allows to select dropdown appearance. Set to `outline` or `fill` for Material form-field styles (applies only to Material theme) */
+-  readonly appearance: import("@angular/core").ModelSignal<string>;
++  readonly appearance: import("@angular/core").ModelSignal<string | undefined>;
+   /** Allows manual control of dropdown opening and closing. `true` - won't close. `false` - won't open. */
+   readonly isOpen: import("@angular/core").ModelSignal<boolean>;
+   /** Items array */

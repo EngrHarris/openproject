@@ -1,6 +1,6 @@
 @if (url) {
   <op-project-autocompleter [ngClass]="'inline-edit--field ' + handler.fieldName"
-    [model]="value"
+    [model]="autocompleterModel"
     [url]="url"
     [filters]="APIFilters"
     [focusDirectly]="!(handler.inEditMode || isNew)"

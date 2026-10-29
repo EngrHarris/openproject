@@ -25,16 +25,22 @@
 // See COPYRIGHT and LICENSE files for more details.
 //++
 
-import { Directive } from '@angular/core';
+import { Directive, Input } from '@angular/core';
+import { OpAutocompleterComponent } from '../op-autocompleter.component';
+import { AutocompleterOptionContext } from '../typings';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[op-autocompleter-option-tmp]',
   standalone: false,
 })
-// A Directive to be used on the option template of
-//  ng-select (what will be shown in each row of drop down)
-// it is used when you want to inject a different template
-export class OpAutocompleterOptionTemplateDirective {
+export class OpAutocompleterOptionTemplateDirective<T = unknown> {
+  @Input('op-autocompleter-option-tmp') autocompleter:Pick<OpAutocompleterComponent<T>, 'items'|'getOptionsFn'>|'';
 
+  static ngTemplateContextGuard<T>(
+    _directive:OpAutocompleterOptionTemplateDirective<T>,
+    _context:unknown,
+  ):_context is AutocompleterOptionContext {
+    return true;
+  }
 }
