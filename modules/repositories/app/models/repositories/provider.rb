@@ -40,5 +40,15 @@ module Repositories
     has_many :users, dependent: :destroy
 
     validates :name, presence: true, uniqueness: true, length: { maximum: 255 }
+
+    class << self
+      def registry_prefix = raise SubclassResponsibilityError
+    end
+
+    def to_s = self.class.registry_prefix
+
+    def registry_entry(registry_path) = Adapters::Registry["#{self.class.registry_prefix}.#{registry_path}"]
+
+    def resolve(registry_path, **init_options) = registry_entry(registry_path).new(model: self, **init_options)
   end
 end
