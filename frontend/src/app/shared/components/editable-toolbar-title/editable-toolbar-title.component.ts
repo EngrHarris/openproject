@@ -48,7 +48,7 @@ export class EditableToolbarTitleComponent implements OnInit, OnChanges {
   private cdRef = inject(ChangeDetectorRef);
 
   // eslint-disable-next-line @angular-eslint/no-input-rename
-  @Input('title') public inputTitle:string;
+  @Input('title') public inputTitle?:string;
 
   @Input() public editable = true;
 
@@ -75,7 +75,7 @@ export class EditableToolbarTitleComponent implements OnInit, OnChanges {
 
   @ViewChild('editableTitleInput') inputField?:ElementRef<HTMLInputElement>;
 
-  public selectedTitle:string;
+  public selectedTitle = '';
 
   public selectableTitleIdentifier = selectableTitleIdentifier;
 
@@ -115,7 +115,7 @@ export class EditableToolbarTitleComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes:SimpleChanges):void {
     if (changes.inputTitle) {
-      this.selectedTitle = changes.inputTitle.currentValue as string;
+      this.selectedTitle = this.inputTitle ?? '';
     }
 
     if (changes.initialFocus && changes.initialFocus.firstChange && this.inputField!) {
@@ -146,7 +146,7 @@ export class EditableToolbarTitleComponent implements OnInit, OnChanges {
 
   public reset():void {
     this.resetInputField();
-    this.selectedTitle = this.inputTitle;
+    this.selectedTitle = this.inputTitle ?? '';
   }
 
   public get showSave():boolean {
