@@ -51,7 +51,7 @@ export class EnterpriseBannerFrameComponent implements OnInit {
     this.visible = this.banners.showBannerFor(this.feature);
     this.frameURL = this.pathHelper.bannerFramePath(this.feature, this.dismissable);
 
-    const trialSuffix = this.banners.trialling(this.feature) ? '_trial' : '';
+    const trialSuffix = this.banners.trialing(this.feature) ? '_trial' : '';
     this.frameID = `enterprise_banner_${this.feature}${trialSuffix}`;
   }
 }

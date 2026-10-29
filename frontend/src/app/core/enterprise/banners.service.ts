@@ -47,14 +47,14 @@ export class BannersService {
       return false;
     }
 
-    return !this.allowsTo(feature) || this.trialling(feature);
+    return !this.allowsTo(feature) || this.trialing(feature);
   }
 
   public allowsTo(feature:string):boolean {
     return this.configuration.availableFeatures.includes(feature);
   }
 
-  public trialling(feature:string):boolean {
+  public trialing(feature:string):boolean {
     return this.configuration.triallingFeatures.includes(feature);
   }
 
