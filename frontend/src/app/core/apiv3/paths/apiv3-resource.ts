@@ -173,7 +173,7 @@ export class ApiV3ResourceCollection<V, T extends ApiV3GettableResource<V>> exte
    * @param select The signaling parameters to request
    * @param params additional URL params to append
    */
-  public signalled<R>(filters:ApiV3FilterBuilder, select:string[], params:Record<string, string> = {}):Observable<R> {
+  public signaled<R>(filters:ApiV3FilterBuilder, select:string[], params:Record<string, string> = {}):Observable<R> {
     const url = addFiltersToPath(this.path, filters, { ...params, select: select.join(',') });
 
     return this
