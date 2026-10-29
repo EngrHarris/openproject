@@ -62,6 +62,11 @@ export class MultiSelectEditFieldComponent extends EditFieldComponent implements
 
   public appendTo:string|null|undefined = null;
 
+  public get projectId():string|null {
+    const project = this.resource.project;
+    return project instanceof HalResource ? project.id ?? null : null;
+  }
+
   public currentValueInvalid = false;
 
   public showAddNewUserButton:boolean;

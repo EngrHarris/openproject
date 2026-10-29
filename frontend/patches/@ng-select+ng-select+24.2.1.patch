@@ -34,6 +34,17 @@ index 9a3de22..1719593 100644
    readonly clearAllText: import("@angular/core").WritableSignal<string>;
    /** Set custom text prefixed to the option label in the aria-label of the remove icon on selected values (multiple mode) */
    readonly _removeText: import("@angular/core").InputSignal<string>;
+@@ -1255,8 +1255,8 @@
+    * DOM — ancestor-scoped styles, stacking context and focus containment. Defaults to the
+    * document body.
+    */
+-  readonly _appendTo: import("@angular/core").InputSignal<string>;
+-  readonly appendTo: import("@angular/core").WritableSignal<string>;
++  readonly _appendTo: import("@angular/core").InputSignal<string | null | undefined>;
++  readonly appendTo: import("@angular/core").WritableSignal<string | null | undefined>;
+   /** Configure which DOM event type is used for outside click detection. Use `'mousedown'` to fix issues with backdrop/loading overlays that appear on dropdown open */
+   readonly _outsideClickEvent: import("@angular/core").InputSignal<"click" | "mousedown">;
+   readonly outsideClickEvent: import("@angular/core").WritableSignal<"click" | "mousedown">;
 @@ -1282,10 +1282,10 @@ export declare class NgSelectComponent implements OnChanges, OnInit, AfterViewIn
    readonly _maxSelectedItems: import("@angular/core").InputSignalWithTransform<number, unknown>;
    readonly maxSelectedItems: import("@angular/core").WritableSignal<number>;
