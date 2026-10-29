@@ -125,7 +125,7 @@ describe('PullRequestComponent', () => {
     component = fixture.componentInstance;
     element = fixture.debugElement;
     // @ts-ignore
-    component.pullRequest = pullRequestStub;
+    component.pullRequest = { ...pullRequestStub };
 
     fixture.detectChanges();
   });
@@ -151,4 +151,38 @@ describe('PullRequestComponent', () => {
     expect(checkRunElement.textContent).toContain(pullRequestStub._embedded.checkRuns[0].name);
     expect(checkRunLinkElement.href).toContain(pullRequestStub._embedded.checkRuns[0].detailsUrl);
   });
+
+  it.each([
+    ['open', false, false, 'open'],
+    ['open', true, false, 'draft'],
+    ['closed', false, false, 'closed'],
+    ['closed', false, true, 'merged'],
+    ['deployed', false, true, 'deployed'],
+  ])('renders the %s state with draft=%s and merged=%s', (state, draft, merged, expected) => {
+    Object.assign(component.pullRequest, { state, draft, merged });
+    expect(component.state).toBe(expected);
+  });
+
+  it.each([undefined, null, 'unsupported'])('does not label unsupported state %s as closed', (state) => {
+    Object.assign(component.pullRequest, { state });
+    expect(component.state).toBeUndefined();
+  });
+
+
+  it('does not render a missing update time or an unsupported state badge', () => {
+    const partialFixture = TestBed.createComponent(PullRequestComponent);
+    partialFixture.componentRef.setInput('pullRequest', { ...pullRequestStub, githubUpdatedAt: null, state: null });
+    partialFixture.detectChanges();
+    expect(partialFixture.debugElement.query(By.css('op-date-time'))).toBeNull();
+    expect(partialFixture.debugElement.query(By.css('op-github-pull-request-state'))).toBeNull();
+  });
+
+  it('renders a nullable title without inventing text or changing the PR link', () => {
+    const partialFixture = TestBed.createComponent(PullRequestComponent);
+    partialFixture.componentRef.setInput('pullRequest', { ...pullRequestStub, title: null });
+    partialFixture.detectChanges();
+    expect(partialFixture.debugElement.query(By.css('.op-pull-request--title')).nativeElement.textContent).toBe('');
+    expect(partialFixture.debugElement.query(By.css('.op-pull-request--link')).nativeElement.getAttribute('href')).toBe(pullRequestStub.htmlUrl);
+  });
+
 });

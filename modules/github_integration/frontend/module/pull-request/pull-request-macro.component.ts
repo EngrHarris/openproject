@@ -122,10 +122,12 @@ export class PullRequestMacroComponent implements OnInit {
     return 'message';
   }
 
-  private htmlLink(href:string, title:string):string {
-    const link = document.createElement('a');
-    link.href = href;
-    link.textContent = title;
+  private htmlLink(href:string|undefined, title:string|null):string {
+    const link = document.createElement(href ? 'a' : 'span');
+    if (href) {
+      link.setAttribute('href', href);
+    }
+    link.textContent = title ?? href ?? null;
 
     return link.outerHTML;
   }

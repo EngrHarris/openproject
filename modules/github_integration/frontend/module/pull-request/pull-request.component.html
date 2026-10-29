@@ -30,14 +30,18 @@
   }
   .
 
-  <span class='op-pull-request--date'>
-    {{ text.label_last_updated_on }}
-    <op-date-time [dateTimeValue]="pullRequest.githubUpdatedAt" />
-  </span>.
+  @if (pullRequest.githubUpdatedAt; as updatedAt) {
+    <span class='op-pull-request--date'>
+      {{ text.label_last_updated_on }}
+      <op-date-time [dateTimeValue]="updatedAt" />
+    </span>.
+  }
 </div>
 
-<op-github-pull-request-state class='op-pull-request--state'
-  [state]="state" />
+@if (state; as pullRequestState) {
+  <op-github-pull-request-state class='op-pull-request--state'
+    [state]="pullRequestState" />
+}
 
 @if (pullRequest._embedded.checkRuns?.length) {
   <span class="op-pull-request--checks-label"

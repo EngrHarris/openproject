@@ -25,6 +25,7 @@
 // See COPYRIGHT and LICENSE files for more details.
 //++
 
+import { userEvent } from 'vitest/browser';
 import FlashController, { LIVE_REGION_ANNOUNCEMENT_DELAY, SUCCESS_AUTOHIDE_TIMEOUT } from './flash.controller';
 import { setupStimulusTest, type StimulusTestContext } from 'core-stimulus/test-helpers';
 
@@ -196,6 +197,7 @@ describe('FlashController', () => {
       const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
 
       ctx.appendHTML(`
+        <button type="button">Outside flash</button>
         <div data-controller="flash" data-flash-autohide-value="true">
           <div data-flash-target="item" data-autohide="true" role="status">
             <button>Action</button>
@@ -204,7 +206,8 @@ describe('FlashController', () => {
       `);
       await ctx.nextFrame();
 
-      const button = ctx.screen.getByRole('button');
+      const button = ctx.screen.getByRole('button', { name: 'Action' });
+      await userEvent.hover(ctx.screen.getByRole('button', { name: 'Outside flash' }));
       button.focus();
       await ctx.nextFrame();
 
@@ -224,6 +227,7 @@ describe('FlashController', () => {
       const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
 
       ctx.appendHTML(`
+        <button type="button">Outside flash</button>
         <div data-controller="flash" data-flash-autohide-value="true">
           <div data-flash-target="item" data-autohide="true" role="status" data-testid="flash-item">
             Message
@@ -233,15 +237,19 @@ describe('FlashController', () => {
       await ctx.nextFrame();
 
       const item = ctx.screen.getByTestId('flash-item');
-      item.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      const outside = ctx.screen.getByRole('button', { name: 'Outside flash' });
+      await userEvent.hover(outside);
+      await userEvent.hover(item);
       await ctx.nextFrame();
 
       expect(clearTimeoutSpy).toHaveBeenCalled();
       timeoutSpy.mockClear();
 
-      item.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+      expect(item.matches(':hover')).toBe(true);
+      await userEvent.hover(outside);
       await ctx.nextFrame();
 
+      expect(item.matches(':hover')).toBe(false);
       const autohideCall = timeoutSpy.mock.calls.find(([, delay]) => delay === SUCCESS_AUTOHIDE_TIMEOUT);
       expect(autohideCall).toBeDefined();
     });
