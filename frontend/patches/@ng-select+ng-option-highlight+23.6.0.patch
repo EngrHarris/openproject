@@ -1,0 +1,41 @@
+diff --git a/node_modules/@ng-select/ng-option-highlight/fesm2022/ng-select-ng-option-highlight.mjs b/node_modules/@ng-select/ng-option-highlight/fesm2022/ng-select-ng-option-highlight.mjs
+index 8d49461..d68ca4e 100644
+--- a/node_modules/@ng-select/ng-option-highlight/fesm2022/ng-select-ng-option-highlight.mjs
++++ b/node_modules/@ng-select/ng-option-highlight/fesm2022/ng-select-ng-option-highlight.mjs
+@@ -36,14 +36,33 @@ class NgOptionHighlightDirective {
+         });
+     }
+     _highlightLabel() {
+-        const label = this.label();
++        this._setInnerHtml(this.label());
+         if (!this.term()) {
+-            this._setInnerHtml(label);
+             return;
+         }
+         const alternationString = escapeRegExp(this.term()).replace(/\s+/g, '|');
+         const termRegex = new RegExp(alternationString, 'gi');
+-        this._setInnerHtml(label.replace(termRegex, `<span class=\"highlighted\">$&</span>`));
++        const document = this.element.ownerDocument;
++        const walker = document.createTreeWalker(this.element, NodeFilter.SHOW_TEXT);
++        const textNodes = [];
++        while (walker.nextNode()) {
++            textNodes.push(walker.currentNode);
++        }
++        for (const node of textNodes) {
++            const text = node.textContent;
++            const fragment = document.createDocumentFragment();
++            let lastIndex = 0;
++            for (const match of text.matchAll(termRegex)) {
++                fragment.append(text.slice(lastIndex, match.index));
++                const highlight = document.createElement('span');
++                highlight.className = 'highlighted';
++                highlight.textContent = match[0];
++                fragment.append(highlight);
++                lastIndex = match.index + match[0].length;
++            }
++            fragment.append(text.slice(lastIndex));
++            node.replaceWith(fragment);
++        }
+     }
+     _setInnerHtml(html) {
+         this.renderer.setProperty(this.element, 'innerHTML', html);

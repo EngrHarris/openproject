@@ -29,9 +29,10 @@ import type { Mock } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { States } from 'core-app/core/states/states.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ChangeDetectionStrategy, Component, NO_ERRORS_SCHEMA } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { of, map, throwError } from 'rxjs';
-import { NgSelectModule } from '@ng-select/ng-select';
+import { OpenprojectAutocompleterModule } from '../openproject-autocompleter.module';
+import { NgOptionHighlightDirective } from '@ng-select/ng-option-highlight';
 
 import { OpAutocompleterComponent } from './op-autocompleter.component';
 import { By } from '@angular/platform-browser';
@@ -45,6 +46,43 @@ import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/com
 })
 class TestAutocompleterComponent extends OpAutocompleterComponent {
 }
+
+@Component({
+  imports: [NgOptionHighlightDirective],
+  template: `
+    <span [ngOptionHighlight]="term()"><em title="Needle &amp; &lt;thread&gt;">Needle &amp; &lt;thread&gt;</em> [x].* tail</span>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestHighlightMarkupComponent {
+  term = signal('needle');
+}
+
+describe('option highlight markup', () => {
+  it.each([
+    { term: 'NEEDLE tail', matches: ['Needle', 'tail'] },
+    { term: '[x].*', matches: ['[x].*'] },
+    { term: ' ', matches: [] },
+  ])('preserves nested markup and attributes when searching $term', ({ term, matches }) => {
+    const fixture = TestBed.createComponent(TestHighlightMarkupComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.term.set(term);
+    fixture.detectChanges();
+
+    const option = (fixture.nativeElement as HTMLElement).querySelector('span')!;
+    expect(option.textContent).toBe('Needle & <thread> [x].* tail');
+    expect(option.querySelector('em')?.getAttribute('title')).toBe('Needle & <thread>');
+    expect(Array.from(option.querySelectorAll('.highlighted'), highlight => highlight.textContent).filter(Boolean))
+      .toEqual(matches);
+
+    fixture.componentInstance.term.set('');
+    fixture.detectChanges();
+
+    expect(option.textContent).toBe('Needle & <thread> [x].* tail');
+    expect(option.querySelector('.highlighted')).toBeNull();
+    expect(option.querySelector('em')?.getAttribute('title')).toBe('Needle & <thread>');
+  });
+});
 
 describe('autocompleter', () => {
   let fixture:ComponentFixture<OpAutocompleterComponent>;
@@ -113,9 +151,7 @@ describe('autocompleter', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [OpAutocompleterComponent],
-      schemas: [NO_ERRORS_SCHEMA],
-      imports: [NgSelectModule],
+      imports: [OpenprojectAutocompleterModule],
       providers: [States, provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
     }).compileComponents();
 
@@ -356,6 +392,96 @@ describe('autocompleter', () => {
       finally {
         vi.useRealTimers();
       }
+    });
+  });
+
+  describe('option highlighting', () => {
+    const subject = '<strong>Needle</strong> & thread';
+
+    beforeEach(() => {
+      getOptionsFnSpy.mockReturnValue(of([{ ...workPackagesStub[0], subject }]));
+      vi.useFakeTimers();
+      fixture.detectChanges();
+      vi.advanceTimersByTime(1000);
+      fixture.detectChanges();
+      fixture.componentInstance.ngSelectInstance.open();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    async function search(term:string):Promise<HTMLElement> {
+      fixture.componentInstance.ngSelectInstance.filter(term);
+      fixture.detectChanges();
+      await vi.advanceTimersByTimeAsync(50);
+      fixture.detectChanges();
+      fixture.detectChanges();
+
+      const option = document.querySelector<HTMLElement>('.op-autocompleter--wp-subject');
+      expect(option).not.toBeNull();
+      return option!;
+    }
+
+    it('highlights matching text while preserving literal markup characters', async () => {
+      const option = await search('needle');
+
+      expect(option.textContent).toBe(subject);
+      expect(option.querySelector('.highlighted')?.textContent).toBe('Needle');
+      expect(option.querySelector('strong')).toBeNull();
+    });
+
+    it.each(['&', '<'])('highlights literal %s characters without changing the label', async (term) => {
+      const option = await search(term);
+
+      expect(option.textContent).toBe(subject);
+      expect(Array.from(option.querySelectorAll('.highlighted'), highlight => highlight.textContent))
+        .toEqual(term === '<' ? ['<', '<'] : ['&']);
+      expect(option.querySelector('strong')).toBeNull();
+
+      const clearedOption = await search('');
+      expect(clearedOption.textContent).toBe(subject);
+      expect(clearedOption.querySelector('.highlighted')).toBeNull();
+    });
+
+    it('highlights whitespace-separated terms case-insensitively', async () => {
+      const option = await search('NEEDLE thread');
+
+      expect(option.textContent).toBe(subject);
+      expect(Array.from(option.querySelectorAll('.highlighted'), highlight => highlight.textContent))
+        .toEqual(['Needle', 'thread']);
+    });
+
+    it('matches regex metacharacters literally', async () => {
+      const literalSubject = 'Before [x].* after';
+      getOptionsFnSpy.mockReturnValue(of([{ ...workPackagesStub[0], subject: literalSubject }]));
+
+      const option = await search('[x].*');
+
+      expect(option.textContent).toBe(literalSubject);
+      expect(option.querySelector('.highlighted')?.textContent).toBe('[x].*');
+    });
+
+    it('removes highlighting when the search term is cleared', async () => {
+      expect((await search('needle')).querySelector('.highlighted')).not.toBeNull();
+
+      const option = await search('');
+
+      expect(option.textContent).toBe(subject);
+      expect(option.querySelector('.highlighted')).toBeNull();
+    });
+
+    it.each([0, 1])('highlights replacement option %i without retaining the previous text', async (index) => {
+      expect((await search('needle')).querySelector('.highlighted')?.textContent).toBe('Needle');
+      const replacementSubject = 'Replacement needle & <thread>';
+      getOptionsFnSpy.mockReturnValue(of([{ ...workPackagesStub[index], subject: replacementSubject }]));
+
+      const option = await search('thread');
+
+      expect(option.textContent).toBe(replacementSubject);
+      expect(option.querySelector('.highlighted')?.textContent).toBe('thread');
+      expect(option.querySelector('thread')).toBeNull();
+      expect(option.textContent).not.toContain('strong');
     });
   });
 

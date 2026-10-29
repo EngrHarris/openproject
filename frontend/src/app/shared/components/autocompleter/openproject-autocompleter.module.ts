@@ -27,6 +27,7 @@
 
 import { NgModule } from '@angular/core';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { NgOptionHighlightDirective } from '@ng-select/ng-option-highlight';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DynamicModule } from 'ng-dynamic-component';
 import { CommonModule } from '@angular/common';
@@ -136,6 +137,7 @@ export const OPENPROJECT_AUTOCOMPLETE_COMPONENTS = [
   imports: [
     CommonModule,
     NgSelectModule,
+    NgOptionHighlightDirective,
     FormsModule,
     ReactiveFormsModule,
 
