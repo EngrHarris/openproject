@@ -87,7 +87,7 @@ export class WorkPackageInlineCreateComponent extends UntilDestroyedMixin implem
 
   @Input() table:WorkPackageTable;
 
-  @Input() projectIdentifier:string;
+  @Input() projectIdentifier:string|null|undefined;
 
   @Output() showing = new EventEmitter<boolean>();
 

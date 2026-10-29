@@ -35,6 +35,23 @@ import { QueryFilterInstanceResource } from 'core-app/features/hal/resources/que
 import { HalResource } from 'core-app/features/hal/resources/hal-resource';
 import { SchemaCacheService } from 'core-app/core/schemas/schema-cache.service';
 
+const relationFilterIds = [
+  'parent',
+  'precedes',
+  'follows',
+  'relates',
+  'duplicates',
+  'duplicated',
+  'blocks',
+  'blocked',
+  'partof',
+  'includes',
+  'requires',
+  'required',
+] as const;
+
+type RelationFilterId = typeof relationFilterIds[number];
+
 @Component({
   templateUrl: './wp-table-configuration-relation-selector.html',
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -53,22 +70,7 @@ export class WpTableConfigurationRelationSelectorComponent implements OnInit {
   readonly schemaCache = inject(SchemaCacheService);
   readonly cdRef = inject(ChangeDetectorRef);
 
-  private relationFilterIds:string[] = [
-    'parent',
-    'precedes',
-    'follows',
-    'relates',
-    'duplicates',
-    'duplicated',
-    'blocks',
-    'blocked',
-    'partof',
-    'includes',
-    'requires',
-    'required',
-  ];
-
-  public availableRelationFilters:QueryFilterResource[] = [];
+  public availableRelationFilters:(QueryFilterResource & { id:RelationFilterId })[] = [];
 
   public selectedRelationFilter:QueryFilterResource|undefined = undefined;
 
@@ -103,7 +105,7 @@ export class WpTableConfigurationRelationSelectorComponent implements OnInit {
   }
 
   private setSelectedRelationFilter():void {
-    const currentRelationFilters:QueryFilterInstanceResource[] = this.relationFiltersOf(this.wpTableFilters.current) as QueryFilterInstanceResource[];
+    const currentRelationFilters:QueryFilterInstanceResource[] = this.relationFiltersOf(this.wpTableFilters.current);
     if (currentRelationFilters.length > 0) {
       this.selectedRelationFilter = this.availableRelationFilters.find((relationFilter) => relationFilter.id === currentRelationFilters[0].id)!;
     } else {
@@ -120,12 +122,13 @@ export class WpTableConfigurationRelationSelectorComponent implements OnInit {
   }
 
   private removeRelationFiltersFromCurrentState() {
-    const filtersToRemove = this.relationFiltersOf(this.wpTableFilters.current) as QueryFilterInstanceResource[];
+    const filtersToRemove = this.relationFiltersOf(this.wpTableFilters.current);
     this.wpTableFilters.remove(...filtersToRemove);
   }
 
-  private relationFiltersOf(filters:QueryFilterResource[]|QueryFilterInstanceResource[]):QueryFilterResource[]|QueryFilterInstanceResource[] {
-    return filters.filter((filter:QueryFilterResource|QueryFilterInstanceResource) => this.relationFilterIds.includes(filter.id));
+  private relationFiltersOf<T extends QueryFilterResource>(filters:T[]):(T & { id:RelationFilterId })[] {
+    return filters.filter((filter):filter is T & { id:RelationFilterId } =>
+      relationFilterIds.some((id) => id === filter.id));
   }
 
   private addFilterToCurrentState(filter:QueryFilterResource):void {
