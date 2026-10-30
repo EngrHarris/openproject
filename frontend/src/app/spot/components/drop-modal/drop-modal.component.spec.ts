@@ -97,7 +97,7 @@ describe('SpotDropModalComponent activation', () => {
     fixture = TestBed.createComponent(DropModalHostComponent);
     fixture.detectChanges();
     await userEvent.click(fixture.nativeElement.querySelector('button'));
-    await new Promise<void>((resolve) => { setTimeout(resolve, 20); });
+    await vi.waitUntil(() => screen.queryByRole('button', { name: 'Activate' }) === document.activeElement);
   });
 
   afterEach(() => fixture.destroy());
@@ -155,7 +155,7 @@ describe('SpotDropModalComponent activation', () => {
 
   it('closes on Escape and restores focus', async () => {
     await userEvent.keyboard('{Escape}');
-    await new Promise<void>((resolve) => { setTimeout(resolve, 20); });
+    await vi.waitUntil(() => !fixture.componentInstance.modal.opened);
     expect(fixture.componentInstance.closed).toHaveBeenCalledOnce();
     expect(fixture.componentInstance.modal.opened).toBe(false);
     expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[tabindex="-1"]'));

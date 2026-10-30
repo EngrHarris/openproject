@@ -43,13 +43,13 @@
     [state]="pullRequestState" />
 }
 
-@if (pullRequest._embedded.checkRuns?.length) {
+@if (pullRequest._embedded.checkRuns.length) {
   <span class="op-pull-request--checks-label"
     [textContent]="text.label_actions"
   ></span>
 }
 
-@if (pullRequest._embedded.checkRuns?.length) {
+@if (pullRequest._embedded.checkRuns.length) {
   <ul
     [attr.aria-label]="text.label_actions"
     class='op-pull-request--checks'
